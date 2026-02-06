@@ -1,6 +1,6 @@
 from flask import Flask
 from app.core.config import config_by_name
-from app.core.extensions import db
+from app.core.extensions import db, jwt
 
 def create_app(config_name="dev"):
     app = Flask(__name__)
@@ -10,6 +10,8 @@ def create_app(config_name="dev"):
 
     # Init extensions
     db.init_app(app)
+    jwt.init_app(app)
+
 
     # Register blueprints
     register_blueprints(app)
