@@ -2,6 +2,8 @@ import os
 
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
+    # Prefer a dedicated JWT secret if provided, otherwise fall back to SECRET_KEY.
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -19,7 +21,10 @@ class TestingConfig(BaseConfig):
     
 class ProductionConfig(BaseConfig):
     DEBUG = False
+    # In production, DATABASE_URL and SECRET_KEY must be explicitly provided.
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
 
 
 config_by_name = {
