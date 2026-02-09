@@ -14,7 +14,7 @@ class DoctorProfile(BaseModel):
     )
 
 doctor_departments = db.Table(
-    "departments",
+    "doctor_departments",
     db.Column("doctor_id", db.Integer, db.ForeignKey("doctor_profiles.id")),
     db.Column("department_id", db.Integer, db.ForeignKey("departments.id")),
 )

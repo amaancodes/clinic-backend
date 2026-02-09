@@ -30,9 +30,8 @@ class AuthService:
         user = User.query.filter_by(email=email).first()
         if not user or not verify_password(password, user.password_hash):
             raise AuthenticationError("Invalid credentials")
-        print("user_id", user.id)
         token = create_access_token(
             identity=str(user.id),  
-            additional_claims={"role": str(user.role)} 
+            additional_claims={"role": str(user.role.value)} 
         )
         return token

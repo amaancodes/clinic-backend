@@ -2,7 +2,7 @@
 venv/
 .venv/
 pyvenv.cfg/
-app/.env/
+.env/
 
 #cursor rules
 .cursorrules/
