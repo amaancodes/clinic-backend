@@ -2,10 +2,10 @@
 venv/
 .venv/
 pyvenv.cfg/
-.env/
+.env
 
 #cursor rules
-.cursorrules/
+.cursorrules
 
 # Python bytecode/cache
 __pycache__/
