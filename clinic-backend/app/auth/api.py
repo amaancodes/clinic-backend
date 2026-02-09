@@ -8,18 +8,24 @@ from app.auth.schemas import (
     LoginRequestSchema,
     LoginResponseSchema,
 )
-
+from app.core.exceptions import ClinicException
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 class RegisterAPI(MethodView):
     def post(self):
-        payload = RegisterRequestSchema().load(request.get_json() or {})
+        try:
+            payload = RegisterRequestSchema().load(request.get_json() or {})
+        except ValidationError as err:
+            logger.warning(f"Validation error: {err.messages}")
+            raise ClinicException(str(err.messages))
+
         user = AuthService.register(
+            payload["name"],
             payload["email"],
             payload["password"],
-            payload["role"],
+        payload["role"],
         )
         response_data = RegisterResponseSchema().dump(user)
         return jsonify(response_data), 201

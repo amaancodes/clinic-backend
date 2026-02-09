@@ -14,8 +14,9 @@ class AuthService:
     """
 
     @staticmethod
-    def register(email: str, password: str, role: str) -> User:
+    def register(name: str, email: str, password: str, role: str) -> User:
         user = User(
+            name=name,
             email=email,
             password_hash=hash_password(password),
             role=Role(role),
@@ -25,13 +26,13 @@ class AuthService:
         return user
 
     @staticmethod
-    def login(email: str, password: str) -> str:
+    def login(email: str, password: str) -> tuple[str, int]:
         user = User.query.filter_by(email=email).first()
         if not user or not verify_password(password, user.password_hash):
             raise AuthenticationError("Invalid credentials")
-
+        print("user_id", user.id)
         token = create_access_token(
-            identity={"id": user.id, "role": user.role.value}
+            identity=str(user.id),  
+            additional_claims={"role": str(user.role)} 
         )
         return token
-

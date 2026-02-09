@@ -21,3 +21,9 @@ class ConflictError(DomainError):
 class ValidationError(DomainError):
     """Raised when input data fails validation rules."""
 
+class ClinicException(Exception):
+    status_code = 400
+
+    def __init__(self, message):
+        self.message = message
+

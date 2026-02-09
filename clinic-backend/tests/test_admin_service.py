@@ -17,7 +17,7 @@ def test_create_department_persists_department(app):
 def test_onboard_doctor_hashes_password_and_sets_role(app):
     with app.app_context():
         profile = AdminService.onboard_doctor(
-            "doctor@example.com", "strong-password", "Cardiology"
+            "Dr. House", "doctor@example.com", "strong-password", "Cardiology"
         )
 
         user = db.session.get(User, profile.user_id)

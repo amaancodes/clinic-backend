@@ -13,11 +13,17 @@ def test_register_and_login_flow(client, app):
     # Register a new member via the API
     response = client.post(
         "/auth/register",
-        json={"email": "apiuser@example.com", "password": "pw123", "role": "member"},
+        json={
+            "name": "API User",
+            "email": "apiuser@example.com",
+            "password": "pw123",
+            "role": "member",
+        },
     )
     assert response.status_code == 201
     data = response.get_json()
     assert "id" in data
+    assert data["name"] == "API User"
 
     # Login via the API
     response = client.post(
@@ -38,7 +44,7 @@ def test_register_validation_errors(client):
     # Missing email and too-short password should trigger validation error
     response = client.post(
         "/auth/register",
-        json={"password": "short", "role": "member"},
+        json={"name": "Shorty", "password": "short", "role": "member"},
     )
     assert response.status_code == 422
     data = response.get_json()
@@ -76,8 +82,8 @@ def test_login_invalid_credentials_returns_401(client):
 def test_admin_department_endpoints_enforce_rbac(client, app):
     with app.app_context():
         # Create an admin and a member using the service layer
-        admin = AuthService.register("admin@example.com", "adminpw", "admin")
-        member = AuthService.register("member@example.com", "memberpw", "member")
+        admin = AuthService.register("Admin User", "admin@example.com", "adminpw", "admin")
+        member = AuthService.register("Member User", "member@example.com", "memberpw", "member")
 
         assert admin.role == Role.ADMIN
         assert member.role == Role.MEMBER
@@ -128,7 +134,7 @@ def test_admin_department_endpoints_enforce_rbac(client, app):
 def test_admin_create_department_validation_error(client, app):
     with app.app_context():
         # Ensure we have an admin user
-        AuthService.register("admin2@example.com", "adminpw", "admin")
+        AuthService.register("Admin Two", "admin2@example.com", "adminpw", "admin")
 
     # Login as admin
     admin_login = client.post(
@@ -148,4 +154,32 @@ def test_admin_create_department_validation_error(client, app):
     assert data.get("error") == "validation_error"
     assert "details" in data
     assert "name" in data["details"]
+
+
+def test_admin_list_users(client, app):
+    with app.app_context():
+        # Ensure we have users
+        AuthService.register("User One", "user1@example.com", "pw123", "member")
+        AuthService.register("User Two", "user2@example.com", "pw123", "member")
+        # Ensure we have an admin
+        AuthService.register("Admin Three", "admin3@example.com", "adminpw", "admin")
+
+    # Login as admin
+    admin_login = client.post(
+        "/auth/login",
+        json={"email": "admin3@example.com", "password": "adminpw"},
+    )
+    admin_token = admin_login.get_json()["access_token"]
+
+    # List users
+    response = client.get(
+        "/admin/users",
+        headers=_auth_header(admin_token),
+    )
+    assert response.status_code == 200
+    users = response.get_json()
+    assert isinstance(users, list)
+    assert len(users) >= 3
+    assert any(u["name"] == "User One" for u in users)
+    assert any(u["role"] == "admin" for u in users)
 

@@ -7,8 +7,14 @@ class DoctorProfile(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     specialization = db.Column(db.String(100))
 
+    departments = db.relationship(
+        "Department",
+        secondary=lambda: doctor_departments,
+        backref="doctors",
+    )
+
 doctor_departments = db.Table(
-    "doctor_departments",
+    "departments",
     db.Column("doctor_id", db.Integer, db.ForeignKey("doctor_profiles.id")),
     db.Column("department_id", db.Integer, db.ForeignKey("departments.id")),
 )

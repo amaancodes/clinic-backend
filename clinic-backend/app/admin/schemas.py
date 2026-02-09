@@ -3,6 +3,8 @@ from app.schemas.admin import (  # re-export for domain-local imports
     DepartmentResponseSchema,
     DoctorOnboardRequestSchema,
     DoctorProfileResponseSchema,
+    UserResponseSchema,
+    DoctorAssignRequestSchema,
 )
 
 __all__ = [
@@ -10,5 +12,7 @@ __all__ = [
     "DepartmentResponseSchema",
     "DoctorOnboardRequestSchema",
     "DoctorProfileResponseSchema",
+    "UserResponseSchema",
+    "DoctorAssignRequestSchema",
 ]
 

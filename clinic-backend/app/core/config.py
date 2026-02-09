@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class BaseConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
@@ -10,10 +13,13 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
+
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
-        "sqlite:///dev.db"
+        "postgresql://postgres:postgres@localhost:5432/clinic"
     )
+    SECRET_KEY = "dev-secret-key-32-bytes-long!!!!!"
+    JWT_SECRET_KEY = "dev-secret-key-32-bytes-long!!!!!"
 
 class TestingConfig(BaseConfig):
     TESTING = True

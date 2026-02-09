@@ -1,12 +1,27 @@
 from flask import Flask, jsonify
 from app.core.config import config_by_name
 from app.core.extensions import db, jwt
+from app.core.logger import setup_logger
+from dotenv import load_dotenv
+import os
 
+#todo: remove this when using alembic.
+#uncomment while running alembic migrations.
+# from flask_sqlalchemy import SQLAlchemy
+# from flask_jwt_extended import JWTManager
+
+# db = SQLAlchemy()
+# jwt = JWTManager()
+
+load_dotenv() 
 def create_app(config_name="dev"):
     app = Flask(__name__)
 
     # Load config
     app.config.from_object(config_by_name[config_name])
+
+    # Setup Logging
+    setup_logger(app)
 
     # Init extensions
     db.init_app(app)
