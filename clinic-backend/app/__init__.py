@@ -7,11 +7,11 @@ import os
 
 #todo: remove this when using alembic.
 #uncomment while running alembic migrations.
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_jwt_extended import JWTManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
 
-# db = SQLAlchemy()
-# jwt = JWTManager()
+db = SQLAlchemy()
+jwt = JWTManager()
 
 load_dotenv() 
 def create_app(config_name="dev"):
@@ -38,11 +38,9 @@ def create_app(config_name="dev"):
 
 
 def register_blueprints(app):
-    from app.api.health import health_bp
     from app.auth.api import auth_bp
     from app.admin.api import admin_bp
 
-    app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
 
