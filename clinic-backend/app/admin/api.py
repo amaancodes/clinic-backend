@@ -43,7 +43,6 @@ admin_bp.add_url_rule(
 
 class UserAPI(MethodView):
     decorators = [jwt_required(), rbac("admin")]
-    print("in userapi")
     def get(self):
         current_app.logger.info("Listing all users")
         users = AdminService.list_users()
