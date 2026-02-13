@@ -4,10 +4,10 @@ from app.core.extensions import db
 from sqlalchemy import  and_
 
 class AppointmentRepository:
-    def create(self, doctor_id: int, patient_id: int, start_time, end_time) -> Appointment:
+    def create(self, patient_id: int, doctor_id: int, start_time, end_time) -> Appointment:
         appointment = Appointment(
-            doctor_id=doctor_id,
             patient_id=patient_id,
+            doctor_id=doctor_id,
             start_time=start_time,
             end_time=end_time,
             status=AppointmentStatus.SCHEDULED

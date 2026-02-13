@@ -8,6 +8,7 @@ class DoctorOnboardRequestSchema(Schema):
 
 class DoctorProfileResponseSchema(Schema):
     id = fields.Integer(required=True)
+    name = fields.String(attribute="user.name", dump_only=True)
     user_id = fields.Integer(required=True)
     specialization = fields.String(required=True)
     departments = fields.Nested("DepartmentResponseSchema", many=True)
@@ -20,7 +21,7 @@ class AvailabilitySchema(Schema):
     end_time = fields.DateTime(required=True)
 
     @validates("end_time")
-    def validate_end_time(self, value):
+    def validate_end_time(self, value, **kwargs):
         # We can't access start_time here easily without accessing the whole object or context, 
         # but marshmallow validates fields individually first. 
         # We should validate at schema level.
@@ -30,7 +31,7 @@ class DoctorAvailabilityRequestSchema(Schema):
     availabilities = fields.List(fields.Nested(AvailabilitySchema), required=True)
 
     @validates("availabilities")
-    def validate_availabilities(self, value):
+    def validate_availabilities(self, value, **kwargs):
         for slot in value:
             if slot['start_time'] >= slot['end_time']:
                 raise ValidationError("Start time must be before end time")

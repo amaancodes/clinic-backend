@@ -30,12 +30,6 @@ class AvailabilityRepository:
     def get_by_doctor_id(self, doctor_id: int) -> list[DoctorAvailability]:
         return DoctorAvailability.query.filter_by(doctor_id=doctor_id).all()
 
-    def clear_future_availability(self, doctor_id: int):
-        # Optional: Strategy to clear old future slots before setting new ones
-        # For now, maybe we just append? But "modify availability" usually means "set my schedule".
-        # Let's support clearing for simplicity if the user wants to reset.
-        # But per request "Only doctors can modify their availability".
-        pass
 
 doctor_repository = DoctorRepository()
 availability_repository = AvailabilityRepository()

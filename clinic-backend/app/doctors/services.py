@@ -20,7 +20,7 @@ class DoctorService:
                 name=name,
                 email=email,
                 password_hash=hash_password(password),
-                role=Role.DOCTOR
+                role=Role.doctor
             )
             db.session.add(user)
             db.session.flush() # Flush to get user.id
@@ -57,14 +57,8 @@ class DoctorService:
         if not doctor:
             raise ValueError("Doctor profile not found")
 
-        # For simplicity, we might just add new slots. 
-        # Or clear future ones. 
-        # Let's just create them.
         try:
             for slot in availabilities:
-                # Check for overlaps? 
-                # "Only doctors can modify their availability"
-                # "Prevent double bookings" - this is usually check at booking time.
                 availability_repository.create(
                     doctor_id=doctor.id,
                     start_time=slot['start_time'],

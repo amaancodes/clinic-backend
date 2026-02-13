@@ -10,13 +10,11 @@ class AppointmentService:
         if start_time >= end_time:
             raise ValueError("Start time must be before end time")
 
-        # Check if doctor exists
         doctor = doctor_repository.get_by_id(doctor_id)
         if not doctor:
             raise ValueError("Doctor not found")
 
-        # Check availability
-        # 1. Doctor must have an availability slot covering this time
+        # Doctor must have an availability slot covering this time
         availabilities = availability_repository.get_by_doctor_id(doctor_id)
         is_covered = False
         for slot in availabilities:
@@ -27,12 +25,11 @@ class AppointmentService:
         if not is_covered:
             raise ValueError("Doctor is not available at this time")
 
-        # 2. No conflicting appointment
+        # No conflicting appointment(preventing double bookings)
         if appointment_repository.find_conflicting(doctor_id, start_time, end_time):
             raise ValueError("Doctor is already booked at this time")
 
         try:
-            # Create appointment
             appointment = appointment_repository.create(patient_id, doctor_id, start_time, end_time)
             db.session.commit()
             return appointment
@@ -45,10 +42,9 @@ class AppointmentService:
         if user_role == "admin":
             return appointment_repository.get_all()
         elif user_role == "doctor":
-            # We need to find doctor_id from user_id
             doctor = doctor_repository.get_by_user_id(user_id)
             if not doctor:
                 return []
             return appointment_repository.get_for_doctor(doctor.id)
-        else: # Member
+        else:
             return appointment_repository.get_for_patient(user_id)
