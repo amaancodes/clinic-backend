@@ -28,4 +28,4 @@ def list_departments():
     current_app.logger.info("Listing all departments")
     departments = DepartmentService.list_departments()
     response_data = DepartmentResponseSchema(many=True).dump(departments)
-    return jsonify(response_data)
+    return jsonify(response_data), 200 

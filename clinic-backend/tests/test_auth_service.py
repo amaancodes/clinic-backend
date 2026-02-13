@@ -9,7 +9,6 @@ from app.auth.services import AuthService
 
 def test_register_hashes_password(app):
     with app.app_context():
-        # register now only takes name, email, password. Role is default member.
         user = AuthService.register("Member User", "member@example.com", "secret")
 
         persisted = db.session.get(User, user.id)

@@ -13,7 +13,6 @@ def _auth_header(token: str) -> dict:
 
 def _create_admin(name="Admin User", email="admin@example.com", password="adminpw"):
     user = AuthService.register(name, email, password)
-    # Manually promote to admin
     user.role = Role.ADMIN
     db.session.commit()
     return user
@@ -23,14 +22,12 @@ def test_admin_onboard_doctor(client, app):
     with app.app_context():
         _create_admin()
 
-    # Login as admin
     admin_login = client.post(
         "/auth/login",
         json={"email": "admin@example.com", "password": "adminpw"},
     )
     admin_token = admin_login.get_json()["access_token"]
 
-    # Onboard doctor - POST /doctors/
     response = client.post(
         "/doctors/",
         json={
@@ -58,21 +55,18 @@ def test_admin_assign_doctor_to_department(client, app):
     with app.app_context():
         _create_admin("Admin User 2", "admin2@example.com", "adminpw")
         dept = DepartmentService.create_department("Cardiology")
-        # Direct service call to create doctor for setup
         profile = DoctorService.onboard_doctor(
             "Dr. Heart", "heart@example.com", "password123", "Cardiology"
         )
         dept_id = dept.id
         doc_id = profile.id
 
-    # Login as admin
     admin_login = client.post(
         "/auth/login",
         json={"email": "admin2@example.com", "password": "adminpw"},
     )
     admin_token = admin_login.get_json()["access_token"]
 
-    # Assign doctor - PUT /doctors/{id}/assign
     response = client.put(
         f"/doctors/{doc_id}/assign",
         json={"department_id": dept_id},
@@ -90,21 +84,19 @@ def test_non_admin_cannot_onboard(client, app):
     with app.app_context():
         AuthService.register("Member User", "member@example.com", "memberpw")
 
-    # Login as member
     member_login = client.post(
         "/auth/login",
         json={"email": "member@example.com", "password": "memberpw"},
     )
     member_token = member_login.get_json()["access_token"]
 
-    # Try to onboard - POST /doctors/
     response = client.post(
         "/doctors/",
         json={
             "name": "Dr. Hack",
             "email": "hack@example.com",
             "password": "password123",
-            "specialization": "Hacking",
+            "specialization": "Cardio",
         },
         headers=_auth_header(member_token),
     )
@@ -115,23 +107,17 @@ def test_assign_doctor_invalid_ids(client, app):
     with app.app_context():
         _create_admin("Admin User 3", "admin3@example.com", "adminpw")
 
-    # Login as admin
+
     admin_login = client.post(
         "/auth/login",
         json={"email": "admin3@example.com", "password": "adminpw"},
     )
     admin_token = admin_login.get_json()["access_token"]
 
-    # Assign non-existent doctor
     response = client.put(
         "/doctors/999/assign",
         json={"department_id": 1},
         headers=_auth_header(admin_token),
     )
-    # The new service might return 400 with a message if not found inside the try-except logic 
-    # or 404 if the route handles it. 
-    # Let's check logic: services.py raise ValueError("Doctor not found"). 
-    # Routes catch ValueError and return 400.
-    # So expected is 400 or 404 depending on how specific we are.
-    # Wait, in the route `assign_doctor`: `except ValueError as e: return jsonify({"message": str(e)}), 400`
+
     assert response.status_code == 400

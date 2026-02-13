@@ -35,13 +35,12 @@ def login():
         payload["email"],
         payload["password"],
     )
-    # result contains access_token, refresh_token, user_id, role
+    current_app.logger.info(f"User logged in: {result['user_id']}")
     response_data = {
-        "message": "User logged in", 
         "access_token": result["access_token"],
         "refresh_token": result["refresh_token"]
     }
-    return jsonify(response_data)
+    return jsonify(response_data), 200
 
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
@@ -56,7 +55,7 @@ def refresh():
         identity=current_user_id,
         additional_claims={"role": str(user.role.value)}
     )
-    return jsonify(access_token=new_access_token)
+    return jsonify(access_token=new_access_token), 200
 
 @auth_bp.route("/users/<int:user_id>/role", methods=["PUT"])
 @jwt_required()
@@ -69,7 +68,7 @@ def assign_role(user_id):
 
     try:
         user = AuthService.assign_role(user_id, payload["role"])
-        return jsonify({"message": f"Role updated to {user.role.value}"}), 200
+        return jsonify({"message": f"Role updated to {user.role.value}", "user_id": user.id}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
