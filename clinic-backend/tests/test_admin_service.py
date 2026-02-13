@@ -1,13 +1,14 @@
 from app.core.extensions import db
 from app.core.security import verify_password
-from app.models.department import Department
-from app.models.user import User, Role
-from app.services.admin_service import AdminService
+from app.departments.models import Department
+from app.auth.models import User, Role
+from app.departments.services import DepartmentService
+from app.doctors.services import DoctorService
 
 
 def test_create_department_persists_department(app):
     with app.app_context():
-        dept = AdminService.create_department("Cardiology")
+        dept = DepartmentService.create_department("Cardiology")
 
         persisted = db.session.get(Department, dept.id)
         assert persisted is not None
@@ -16,7 +17,8 @@ def test_create_department_persists_department(app):
 
 def test_onboard_doctor_hashes_password_and_sets_role(app):
     with app.app_context():
-        profile = AdminService.onboard_doctor(
+        # DoctorService.onboard_doctor(name, email, password, specialization)
+        profile = DoctorService.onboard_doctor(
             "Dr. House", "doctor@example.com", "strong-password", "Cardiology"
         )
 
