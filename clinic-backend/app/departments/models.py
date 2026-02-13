@@ -1,5 +1,5 @@
-from app.models.base import BaseModel
 from app.core.extensions import db
+from app.models.base import BaseModel
 
 class Department(BaseModel):
     __tablename__ = "departments"

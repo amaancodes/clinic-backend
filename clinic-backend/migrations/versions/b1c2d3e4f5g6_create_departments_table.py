@@ -24,10 +24,10 @@ def upgrade() -> None:
     op.create_table(
     'departments',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name'),
+    sa.Column("created_at", sa.DateTime(), nullable=True)
 )
 
     # ### end Alembic commands ###

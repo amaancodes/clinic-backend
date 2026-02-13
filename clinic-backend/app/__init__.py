@@ -38,11 +38,15 @@ def create_app(config_name="dev"):
 
 
 def register_blueprints(app):
-    from app.auth.api import auth_bp
-    from app.admin.api import admin_bp
+    from app.auth.routes import auth_bp
+    from app.departments.routes import departments_bp
+    from app.doctors.routes import doctors_bp
+    from app.appointments.routes import appointments_bp
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(admin_bp)
+    app.register_blueprint(departments_bp)
+    app.register_blueprint(doctors_bp)
+    app.register_blueprint(appointments_bp)
 
 
 def register_error_handlers(app):
