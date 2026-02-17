@@ -42,11 +42,13 @@ def register_blueprints(app):
     from app.departments.routes import departments_bp
     from app.doctors.routes import doctors_bp
     from app.appointments.routes import appointments_bp
+    from app.reimbursements.routes import reimbursements_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(departments_bp)
     app.register_blueprint(doctors_bp)
     app.register_blueprint(appointments_bp)
+    app.register_blueprint(reimbursements_bp)
 
 
 def register_error_handlers(app):
