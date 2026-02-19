@@ -7,12 +7,14 @@ from app.core.extensions import db
 from app.core.security import hash_password
 from datetime import datetime
 
+from app.core.constants import ErrorMessages
+
 class DoctorService:
     @staticmethod
     def onboard_doctor(name: str, email: str, password: str, specialization: str) -> Doctor:
         # Check if user exists
         if User.query.filter_by(email=email).first():
-            raise ValueError("User with this email already exists")
+            raise ValueError(ErrorMessages.USER_EMAIL_EXISTS)
 
         try:
             # Create User
@@ -37,11 +39,11 @@ class DoctorService:
     def assign_department(doctor_id: int, department_id: int):
         doctor = doctor_repository.get_by_id(doctor_id)
         if not doctor:
-            raise ValueError("Doctor not found")
+            raise ValueError(ErrorMessages.DOCTOR_NOT_FOUND)
         
         department = department_repository.get_by_id(department_id)
         if not department:
-            raise ValueError("Department not found")
+            raise ValueError(ErrorMessages.DEPARTMENT_NOT_FOUND)
 
         try:
             if department not in doctor.departments:
@@ -55,7 +57,7 @@ class DoctorService:
     def set_availability(user_id: int, availabilities: list[dict]):
         doctor = doctor_repository.get_by_user_id(user_id)
         if not doctor:
-            raise ValueError("Doctor profile not found")
+            raise ValueError(ErrorMessages.DOCTOR_PROFILE_NOT_FOUND)
 
         try:
             for slot in availabilities:
@@ -70,9 +72,9 @@ class DoctorService:
             raise e
 
     @staticmethod
-    def get_doctor_availability(doctor_id: int) -> list[DoctorAvailability]:
-        return availability_repository.get_by_doctor_id(doctor_id)
+    def get_doctor_availability(doctor_id: int, limit=None, offset=None) -> list[DoctorAvailability]:
+        return availability_repository.get_by_doctor_id(doctor_id, limit=limit, offset=offset)
 
     @staticmethod
-    def list_doctors() -> list[Doctor]:
-        return doctor_repository.get_all()
+    def list_doctors(limit=None, offset=None) -> list[Doctor]:
+        return doctor_repository.get_all(limit=limit, offset=offset)

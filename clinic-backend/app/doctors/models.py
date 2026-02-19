@@ -13,13 +13,19 @@ class Doctor(BaseModel):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     specialization = db.Column(db.String(100))
 
-    user = db.relationship("User", backref=db.backref("doctor_profile", uselist=False))
+    user = db.relationship("User", back_populates="doctor_profile")
     
     departments = db.relationship(
         "Department",
         secondary=doctor_departments,
-        backref="doctors",
+        back_populates="doctors",
     )
+
+    availabilities = db.relationship("DoctorAvailability", back_populates="doctor", cascade="all, delete-orphan")
+    appointments = db.relationship("Appointment", back_populates="doctor")
+
+    def __repr__(self):
+        return f"<Doctor {self.id} - {self.specialization}>"
 
 class DoctorAvailability(BaseModel):
     __tablename__ = "doctor_availabilities"
@@ -29,4 +35,7 @@ class DoctorAvailability(BaseModel):
     end_time = db.Column(db.DateTime, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
 
-    doctor = db.relationship("Doctor", backref="availabilities")
+    doctor = db.relationship("Doctor", back_populates="availabilities")
+
+    def __repr__(self):
+        return f"<DoctorAvailability {self.id} - {self.doctor_id} ({self.start_time} to {self.end_time})>"

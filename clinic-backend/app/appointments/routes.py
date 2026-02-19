@@ -36,6 +36,12 @@ def list_appointments():
     claims = get_jwt()
     role = claims.get("role")
     
-    appointments = AppointmentService.list_appointments(role, user_id)
-    response_data = AppointmentResponseSchema(many=True).dump(appointments)
-    return jsonify(response_data)
+    try:
+        limit = request.args.get('limit', type=int)
+        offset = request.args.get('offset', type=int)
+        
+        appointments = AppointmentService.list_appointments(role, user_id, limit=limit, offset=offset)
+        response_data = AppointmentResponseSchema(many=True).dump(appointments)
+        return jsonify(response_data), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

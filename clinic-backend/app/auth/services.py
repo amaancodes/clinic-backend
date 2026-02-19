@@ -6,6 +6,8 @@ from app.core.exceptions import AuthenticationError, ResourceNotFoundError
 from app.core.security import hash_password, verify_password
 
 
+from app.core.constants import ErrorMessages
+
 class AuthService:
     """
     Authentication service.
@@ -33,7 +35,7 @@ class AuthService:
     def login(email: str, password: str) -> dict:
         user = User.query.filter_by(email=email).first()
         if not user or not verify_password(password, user.password_hash):
-            raise AuthenticationError("Invalid credentials")
+            raise AuthenticationError(ErrorMessages.INVALID_CREDENTIALS)
         
         access_token = create_access_token(
             identity=str(user.id),  
@@ -52,7 +54,7 @@ class AuthService:
     def assign_role(user_id: int, role_name: str) -> User:
         user = db.session.get(User, user_id)
         if not user:
-            raise ResourceNotFoundError("User not found")
+            raise ResourceNotFoundError(ErrorMessages.USER_NOT_FOUND)
         
         try:
             # Validate role
@@ -62,7 +64,7 @@ class AuthService:
             return user
         except ValueError:
              # Should be caught by schema validation, but just in case
-             raise ValueError("Invalid role")
+             raise ValueError(ErrorMessages.INVALID_ROLE)
         except Exception as e:
             db.session.rollback()
             raise e

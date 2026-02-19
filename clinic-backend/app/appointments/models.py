@@ -1,6 +1,7 @@
 from app.models.base import BaseModel
 from app.core.extensions import db
 from app.core.enum import AppointmentStatus
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
 class Appointment(BaseModel):
     __tablename__ = "appointments"
@@ -15,5 +16,17 @@ class Appointment(BaseModel):
         nullable=False
     )
 
-    doctor = db.relationship("Doctor", backref="appointments")
-    patient = db.relationship("User", backref="appointments")
+    doctor = db.relationship("Doctor", back_populates="appointments")
+    patient = db.relationship("User", back_populates="appointments")
+
+    __table_args__ = (
+        ExcludeConstraint(
+            ("doctor_id", "="),
+            (db.func.tsrange(db.literal_column("start_time"), db.literal_column("end_time")), "&&"),
+            name="prevent_overlapping_appointments",
+            where=(db.literal_column("status") != 'CANCELLED')
+        ),
+    )
+
+    def __repr__(self):
+        return f"<Appointment {self.id} - {self.status}>"

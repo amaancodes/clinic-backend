@@ -22,8 +22,13 @@ class UserRepository:
     def find_by_id(self, user_id: int) -> User | None:
         return db.session.get(User, user_id)
 
-    def get_all_users(self) -> list[User]:
-        return User.query.all()
+    def get_all_users(self, limit=None, offset=None) -> list[User]:
+        query = User.query
+        if limit is not None:
+            query = query.limit(limit)
+        if offset is not None:
+            query = query.offset(offset)
+        return query.all()
 
     def update_role(self, user: User, new_role: str) -> User:
         user.role = new_role

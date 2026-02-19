@@ -14,5 +14,5 @@ class DepartmentService:
             raise e
 
     @staticmethod
-    def list_departments() -> list[Department]:
-        return department_repository.get_all()
+    def list_departments(limit=None, offset=None) -> list[Department]:
+        return department_repository.get_all(limit=limit, offset=offset)

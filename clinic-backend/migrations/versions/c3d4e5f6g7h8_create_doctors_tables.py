@@ -47,6 +47,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
         sa.ForeignKeyConstraint(['doctor_id'], ['doctors.id'], )
     )
+    op.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+    
     op.create_table(
         'appointments',
         sa.Column('id', sa.Integer(), nullable=False),
@@ -58,7 +60,21 @@ def upgrade() -> None:
         sa.Column('status', sa.Enum('SCHEDULED', 'COMPLETED', 'CANCELLED', name='appointment_status'), nullable=False),
         sa.ForeignKeyConstraint(['doctor_id'], ['doctors.id'], ),
         sa.ForeignKeyConstraint(['patient_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('id')
+        sa.PrimaryKeyConstraint('id'),
+        sa.CheckConstraint("start_time < end_time", name="check_start_before_end"),
+    )
+    
+    # Add ExcludeConstraint separately to ensure dialect support is handled or clear
+    from sqlalchemy.dialects.postgresql import ExcludeConstraint
+    
+    op.create_exclude_constraint(
+        "prevent_overlapping_appointments",
+        "appointments",
+        (
+            ("doctor_id", "="),
+            (sa.func.tsrange(sa.column("start_time"), sa.column("end_time")), "&&")
+        ),
+        where=(sa.column("status") != 'CANCELLED') # Optional: ignore cancelled
     )
     # ### end Alembic commands ###
 

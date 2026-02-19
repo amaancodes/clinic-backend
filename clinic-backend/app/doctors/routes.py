@@ -13,6 +13,8 @@ from app.core.rbac import rbac
 
 doctors_bp = Blueprint("doctors", __name__, url_prefix="/doctors")
 
+from app.core.constants import ErrorMessages
+
 @doctors_bp.route("/", methods=["POST"])
 @jwt_required()
 @rbac("admin")
@@ -29,6 +31,8 @@ def onboard_doctor():
         return jsonify(response_data), 201
     except ValueError as e:
         return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": ErrorMessages.UNEXPECTED_ERROR, "error": str(e)}), 500
 
 @doctors_bp.route("/<int:doctor_id>/assign", methods=["PUT"])
 @jwt_required()
@@ -40,6 +44,8 @@ def assign_doctor(doctor_id):
         return jsonify({"message": "Doctor assigned to department successfully"}), 200
     except ValueError as e:
         return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": ErrorMessages.UNEXPECTED_ERROR, "error": str(e)}), 500
 
 @doctors_bp.route("/availability", methods=["POST"])
 @jwt_required()
@@ -52,17 +58,31 @@ def manage_availability():
         return jsonify({"message": "Availability updated successfully"}), 200
     except ValueError as e:
         return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": ErrorMessages.UNEXPECTED_ERROR, "error": str(e)}), 500
 
 @doctors_bp.route("/list", methods=["GET"])
 @jwt_required()
 def list_doctors():
-    doctors = DoctorService.list_doctors()
-    response_data = DoctorProfileResponseSchema(many=True).dump(doctors)
-    return jsonify(response_data)
+    try:
+        limit = request.args.get('limit', type=int)
+        offset = request.args.get('offset', type=int)
+
+        doctors = DoctorService.list_doctors(limit=limit, offset=offset)
+        response_data = DoctorProfileResponseSchema(many=True, only=("id", "name", "user_id", "specialization")).dump(doctors)
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
 @doctors_bp.route("/<int:doctor_id>/availability", methods=["GET"])
 @jwt_required()
 def get_availability(doctor_id):
-    availabilities = DoctorService.get_doctor_availability(doctor_id)
-    response_data = AvailabilitySchema(many=True).dump(availabilities)
-    return jsonify(response_data)
+    try:
+        limit = request.args.get('limit', type=int)
+        offset = request.args.get('offset', type=int)
+
+        availabilities = DoctorService.get_doctor_availability(doctor_id, limit=limit, offset=offset)
+        response_data = AvailabilitySchema(many=True).dump(availabilities)
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

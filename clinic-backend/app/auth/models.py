@@ -10,3 +10,9 @@ class User(BaseModel):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum(Role, name="role", native_enum=True), nullable=False)
+
+    appointments = db.relationship("Appointment", back_populates="patient")
+    doctor_profile = db.relationship("Doctor", uselist=False, back_populates="user")
+
+    def __repr__(self):
+        return f"<User {self.id} - {self.email} ({self.role})>"

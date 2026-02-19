@@ -20,13 +20,6 @@ class AvailabilitySchema(Schema):
     start_time = fields.DateTime(required=True)
     end_time = fields.DateTime(required=True)
 
-    @validates("end_time")
-    def validate_end_time(self, value, **kwargs):
-        # We can't access start_time here easily without accessing the whole object or context, 
-        # but marshmallow validates fields individually first. 
-        # We should validate at schema level.
-        pass
-
 class DoctorAvailabilityRequestSchema(Schema):
     availabilities = fields.List(fields.Nested(AvailabilitySchema), required=True)
 
