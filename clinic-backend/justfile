@@ -1,0 +1,26 @@
+# Set default shell
+set shell := ["bash", "-c"]
+
+# Bring up docker containers in the background
+up:
+    docker-compose up -d
+
+# Bring down docker containers
+down:
+    docker-compose down
+
+# Generate a new database migration automatically
+migrate-generate message:
+    alembic revision --autogenerate -m "{{message}}"
+
+# Apply all pending migrations to the database
+migrate-upgrade:
+    alembic upgrade head
+
+# Revert the last applied migration
+migrate-downgrade:
+    alembic downgrade -1
+
+# Run the pytest suite
+test:
+    pytest app/

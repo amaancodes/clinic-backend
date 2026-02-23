@@ -13,6 +13,7 @@ class User(BaseModel):
 
     appointments = db.relationship("Appointment", back_populates="patient")
     doctor_profile = db.relationship("Doctor", uselist=False, back_populates="user")
+    reimbursements = db.relationship("Reimbursement", back_populates="member")
 
     def __repr__(self):
         return f"<User {self.id} - {self.email} ({self.role})>"

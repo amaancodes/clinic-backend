@@ -1,6 +1,6 @@
 import logging
-from backend.auth.models import User
-from backend.common.db import db
+from app.auth.models import User
+from app.core.extensions import db
 
 logger = logging.getLogger(__name__)
 
@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 class UserRepository:
     """Repository for User database operations."""
 
-    def create(self, email: str, password: str, role: str) -> User:
+    def create(self, name: str, email: str, password_hash: str, role: str) -> User:
         """Create a new user."""
         logger.debug("Creating new user")
-        user = User(email=email, password=password, role=role)
+        user = User(name=name, email=email, password_hash=password_hash, role=role)
         db.session.add(user)
         return user
 

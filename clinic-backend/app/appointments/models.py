@@ -18,6 +18,7 @@ class Appointment(BaseModel):
 
     doctor = db.relationship("Doctor", back_populates="appointments")
     patient = db.relationship("User", back_populates="appointments")
+    reimbursement = db.relationship("Reimbursement", uselist=False, back_populates="appointment")
 
     __table_args__ = (
         ExcludeConstraint(
