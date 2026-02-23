@@ -1,9 +1,10 @@
 from app.appointments.models import Appointment
 from app.core.enum import AppointmentStatus
 from app.core.extensions import db
+from datetime import datetime
 
 class AppointmentRepository:
-    def create(self, patient_id: int, doctor_id: int, start_time, end_time) -> Appointment:
+    def create(self, patient_id: int, doctor_id: int, start_time: datetime, end_time: datetime) -> Appointment:
         appointment = Appointment(
             patient_id=patient_id,
             doctor_id=doctor_id,
@@ -14,7 +15,7 @@ class AppointmentRepository:
         db.session.add(appointment)
         return appointment
 
-    def find_conflicting(self, doctor_id: int, start_time, end_time) -> bool:
+    def find_conflicting(self, doctor_id: int, start_time: datetime, end_time: datetime) -> bool:
         # Check if any appointment overlaps
         # Overlap logic: (StartA < EndB) and (EndA > StartB)
         query = Appointment.query.filter(

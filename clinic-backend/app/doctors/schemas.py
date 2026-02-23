@@ -7,11 +7,11 @@ class DoctorOnboardRequestSchema(Schema):
     specialization = fields.String(required=True, validate=validate.Length(min=1))
 
 class DoctorProfileResponseSchema(Schema):
-    id = fields.Integer(required=True)
+    id = fields.Integer(dump_only=True)
     name = fields.String(attribute="user.name", dump_only=True)
-    user_id = fields.Integer(required=True)
-    specialization = fields.String(required=True)
-    departments = fields.Nested("DepartmentResponseSchema", many=True)
+    user_id = fields.Integer(dump_only=True)
+    specialization = fields.String(dump_only=True)
+    departments = fields.Nested("DepartmentResponseSchema", many=True, dump_only=True)
 
 class DoctorAssignRequestSchema(Schema):
     department_id = fields.Integer(required=True)
