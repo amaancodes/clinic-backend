@@ -10,6 +10,8 @@ from app.core.rbac import rbac
 
 appointments_bp = Blueprint("appointments", __name__, url_prefix="/appointments")
 
+from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError
+
 @appointments_bp.route("/", methods=["POST"])
 @jwt_required()
 @rbac("member")
@@ -26,8 +28,12 @@ def book_appointment():
         )
         response_data = AppointmentResponseSchema().dump(appointment)
         return jsonify(response_data), 201
-    except ValueError as e:
+    except ValidationError as e:
         return jsonify({"message": str(e)}), 400
+    except ResourceNotFoundError as e:
+        return jsonify({"message": str(e)}), 404
+    except ConflictError as e:
+        return jsonify({"message": str(e)}), 409
 
 @appointments_bp.route("/", methods=["GET"])
 @jwt_required()

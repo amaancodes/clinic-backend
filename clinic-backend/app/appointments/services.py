@@ -31,17 +31,18 @@ class MemberListingStrategy(AppointmentListingStrategy):
 
 from sqlalchemy.exc import IntegrityError
 from app.core.constants import ErrorMessages
+from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError
 
 class AppointmentService:
     @staticmethod
     def book_appointment(patient_id: int, doctor_id: int, start_time: datetime, end_time: datetime) -> Appointment:
         if start_time >= end_time:
-            raise ValueError(ErrorMessages.START_TIME_BEFORE_END_TIME)
+            raise ValidationError(ErrorMessages.START_TIME_BEFORE_END_TIME)
 
         # Use pessimistic lock to prevent concurrent bookings
         doctor = doctor_repository.get_by_id_with_lock(doctor_id)
         if not doctor:
-            raise ValueError(ErrorMessages.DOCTOR_NOT_FOUND)
+            raise ResourceNotFoundError(ErrorMessages.DOCTOR_NOT_FOUND)
 
         # Doctor must have an availability slot covering this time
         availabilities = availability_repository.get_by_doctor_id(doctor_id)
@@ -52,11 +53,11 @@ class AppointmentService:
                 break
 
         if not is_covered:
-            raise ValueError(ErrorMessages.DOCTOR_UNAVAILABLE)
+            raise ValidationError(ErrorMessages.DOCTOR_UNAVAILABLE)
 
         # No conflicting appointment(preventing double bookings) - checks existing records
         if appointment_repository.find_conflicting(doctor_id, start_time, end_time):
-            raise ValueError(ErrorMessages.DOCTOR_ALREADY_BOOKED)
+            raise ConflictError(ErrorMessages.DOCTOR_ALREADY_BOOKED)
 
         try:
             appointment = appointment_repository.create(patient_id, doctor_id, start_time, end_time)
@@ -65,7 +66,7 @@ class AppointmentService:
         except IntegrityError:
             # Fallback for race conditions caught by DB constraint
             db.session.rollback()
-            raise ValueError(ErrorMessages.DOCTOR_ALREADY_BOOKED)
+            raise ConflictError(ErrorMessages.DOCTOR_ALREADY_BOOKED)
         except Exception as e:
             db.session.rollback()
             raise e

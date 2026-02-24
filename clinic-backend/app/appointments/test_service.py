@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 from app.appointments.services import AppointmentService
 from app.core.constants import ErrorMessages
 from app.core.enum import Role
+from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError
 
 @patch('app.appointments.services.doctor_repository.get_by_id_with_lock')
 @patch('app.appointments.services.availability_repository.get_by_doctor_id')
@@ -32,7 +33,7 @@ def test_appointment_service_book_success(mock_create, mock_conflict, mock_get_a
 def test_appointment_service_book_invalid_time():
     start = datetime(2026, 6, 1, 11, 0)
     end = datetime(2026, 6, 1, 10, 0)
-    with pytest.raises(ValueError, match=ErrorMessages.START_TIME_BEFORE_END_TIME):
+    with pytest.raises(ValidationError, match=ErrorMessages.START_TIME_BEFORE_END_TIME):
         AppointmentService.book_appointment(1, 1, start, end)
 
 @patch('app.appointments.services.doctor_repository.get_by_id_with_lock')
@@ -40,7 +41,7 @@ def test_appointment_service_book_doctor_not_found(mock_get_doc):
     mock_get_doc.return_value = None
     start = datetime(2026, 6, 1, 10, 0)
     end = datetime(2026, 6, 1, 11, 0)
-    with pytest.raises(ValueError, match=ErrorMessages.DOCTOR_NOT_FOUND):
+    with pytest.raises(ResourceNotFoundError, match=ErrorMessages.DOCTOR_NOT_FOUND):
         AppointmentService.book_appointment(1, 999, start, end)
 
 @patch('app.appointments.services.doctor_repository.get_by_id_with_lock')
@@ -59,7 +60,7 @@ def test_appointment_service_book_conflict(mock_conflict, mock_get_avail, mock_g
     start = datetime(2026, 6, 1, 10, 0)
     end = datetime(2026, 6, 1, 11, 0)
     
-    with pytest.raises(ValueError, match=ErrorMessages.DOCTOR_ALREADY_BOOKED):
+    with pytest.raises(ConflictError, match=ErrorMessages.DOCTOR_ALREADY_BOOKED):
         AppointmentService.book_appointment(1, 1, start, end)
 
 @patch('app.appointments.services.appointment_repository.get_all')
