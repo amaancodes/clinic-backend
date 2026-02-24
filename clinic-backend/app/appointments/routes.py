@@ -10,7 +10,7 @@ from app.core.rbac import rbac
 
 appointments_bp = Blueprint("appointments", __name__, url_prefix="/appointments")
 
-from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError
+from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError, AuthenticationError, AuthorizationError
 
 @appointments_bp.route("/", methods=["POST"])
 @jwt_required()
@@ -38,16 +38,26 @@ def book_appointment():
 @appointments_bp.route("/", methods=["GET"])
 @jwt_required()
 def list_appointments():
-    user_id = int(get_jwt_identity())
-    claims = get_jwt()
-    role = claims.get("role")
-    
     try:
+        user_identity = get_jwt_identity()
+        if not user_identity:
+            raise AuthenticationError("User not found")
+        user_id = int(user_identity)
+        
+        claims = get_jwt()
+        role = claims.get("role")
+        if not role:
+            raise AuthorizationError("Role not found")
+            
         limit = request.args.get('limit', type=int)
         offset = request.args.get('offset', type=int)
         
         appointments = AppointmentService.list_appointments(role, user_id, limit=limit, offset=offset)
         response_data = AppointmentResponseSchema(many=True).dump(appointments)
         return jsonify(response_data), 200
+    except AuthenticationError as e:
+        return jsonify({"message": str(e)}), 401
+    except AuthorizationError as e:
+        return jsonify({"message": str(e)}), 403
     except Exception as e:
         return jsonify({"message": str(e)}), 400
