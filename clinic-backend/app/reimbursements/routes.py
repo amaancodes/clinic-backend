@@ -1,20 +1,22 @@
-from flask import request, jsonify
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from app.reimbursements import reimbursements_bp
+
+reimbursements_bp = Blueprint("reimbursements", __name__, url_prefix="/reimbursements")
 from app.reimbursements.services import ReimbursementService
-from app.reimbursements.schemas import ReimbursementCreateSchema, ReimbursementResponseSchema, ReimbursementUpdateSchema
+from app.reimbursements.schemas import ReimbursementBaseSchema, ReimbursementResponseSchema, ReimbursementUpdateSchema
 from app.core.feature_flags import require_feature
 from app.core.rbac import rbac
 from app.core.enum import Role, ReimbursementStatus
+from app.core.exceptions import ResourceNotFoundError, AuthorizationError, ValidationError
 
-reimbursement_schema = ReimbursementCreateSchema()
+reimbursement_schema = ReimbursementBaseSchema()
 reimbursement_response_schema = ReimbursementResponseSchema()
 reimbursements_schema = ReimbursementResponseSchema(many=True)
 reimbursement_update_schema = ReimbursementUpdateSchema()
 
-@reimbursements_bp.route("/reimbursements", methods=["POST"])
+@reimbursements_bp.route("/", methods=["POST"])
 @jwt_required()
-@rbac(Role.member)
+@rbac(Role.member) 
 @require_feature("reimbursement_module")
 def create_reimbursement():
     try:
@@ -33,7 +35,7 @@ def create_reimbursement():
     except Exception as e:
         return jsonify({"message": "An unexpected error occurred", "error": str(e)}), 500
 
-@reimbursements_bp.route("/reimbursements", methods=["GET"])
+@reimbursements_bp.route("/", methods=["GET"])
 @jwt_required()
 @require_feature("reimbursement_module")
 def get_reimbursements():
@@ -47,7 +49,7 @@ def get_reimbursements():
     except Exception as e:
         return jsonify({"message": "An unexpected error occurred", "error": str(e)}), 500
 
-@reimbursements_bp.route("/reimbursements/<int:id>/status", methods=["PUT"])
+@reimbursements_bp.route("/<int:id>/status", methods=["PUT"])
 @jwt_required()
 @rbac(Role.admin)
 @require_feature("reimbursement_module")

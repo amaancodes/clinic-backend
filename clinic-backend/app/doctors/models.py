@@ -10,7 +10,7 @@ doctor_departments = db.Table(
 class Doctor(BaseModel):
     __tablename__ = "doctors"
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
     specialization = db.Column(db.String(100))
 
     user = db.relationship("User", back_populates="doctor_profile")
@@ -30,7 +30,7 @@ class Doctor(BaseModel):
 class DoctorAvailability(BaseModel):
     __tablename__ = "doctor_availabilities"
 
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False, index=True)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     is_available = db.Column(db.Boolean, default=True)

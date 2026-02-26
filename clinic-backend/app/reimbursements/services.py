@@ -24,7 +24,7 @@ class ReimbursementService:
                 description=data.get('description'),
                 member_id=member_id,
                 appointment_id=data['appointment_id'],
-                status=ReimbursementStatus.PENDING
+                status=ReimbursementStatus.PENDING.value
             )
             db.session.commit()
             return reimbursement

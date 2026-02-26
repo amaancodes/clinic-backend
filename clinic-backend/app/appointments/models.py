@@ -6,8 +6,8 @@ from sqlalchemy.dialects.postgresql import ExcludeConstraint
 class Appointment(BaseModel):
     __tablename__ = "appointments"
 
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False)
-    patient_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctors.id"), nullable=False, index=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(

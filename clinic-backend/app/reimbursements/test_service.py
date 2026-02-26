@@ -23,7 +23,7 @@ def test_reimbursement_service_create(db_session, mock_appointment):
     
     assert reimb.id is not None
     assert reimb.amount == 1500.0
-    assert reimb.status == ReimbursementStatus.PENDING
+    assert reimb.status == ReimbursementStatus.PENDING.value
 
 def test_reimbursement_service_create_invalid_appointment(db_session, mock_appointment):
     data = {
@@ -62,5 +62,5 @@ def test_reimbursement_service_update_status(db_session, mock_appointment):
     reimb = ReimbursementService.create_reimbursement(data, member_id=1)
     db_session.flush()
     
-    updated = ReimbursementService.update_reimbursement_status(reimb.id, ReimbursementStatus.APPROVED)
-    assert updated.status == ReimbursementStatus.APPROVED
+    updated = ReimbursementService.update_reimbursement_status(reimb.id, ReimbursementStatus.APPROVED.value)
+    assert updated.status == ReimbursementStatus.APPROVED.value
