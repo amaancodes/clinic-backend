@@ -5,13 +5,7 @@ from app.core.logger import setup_logger
 from dotenv import load_dotenv
 import os
 
-#todo: remove this when using alembic.
-#uncomment while running alembic migrations.
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-
-db = SQLAlchemy()
-jwt = JWTManager()
+# Duplicate initializations removed.
 
 load_dotenv() 
 def create_app(config_name="dev"):

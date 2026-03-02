@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 import logging
 from app.auth.services import AuthService
-from app.core.exceptions import ClinicException
+from app.core.exceptions import ClinicException, AuthenticationError
 from marshmallow import ValidationError
 from app.auth.schemas import RegisterSchema, LoginSchema, RoleAssignmentSchema
 from app.auth.models import User
