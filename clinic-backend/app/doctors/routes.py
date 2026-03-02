@@ -65,8 +65,8 @@ def manage_availability():
 @jwt_required()
 def list_doctors():
     try:
-        limit = request.args.get('limit', type=int)
-        offset = request.args.get('offset', type=int)
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        offset = request.args.get('offset', 0, type=int)
 
         doctors = DoctorService.list_doctors(limit=limit, offset=offset)
         response_data = DoctorProfileResponseSchema(many=True, only=("id", "name", "user_id", "specialization")).dump(doctors)
@@ -78,8 +78,8 @@ def list_doctors():
 @jwt_required()
 def get_availability(doctor_id):
     try:
-        limit = request.args.get('limit', type=int)
-        offset = request.args.get('offset', type=int)
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        offset = request.args.get('offset', 0, type=int)
 
         availabilities = DoctorService.get_doctor_availability(doctor_id, limit=limit, offset=offset)
         response_data = AvailabilitySchema(many=True).dump(availabilities)

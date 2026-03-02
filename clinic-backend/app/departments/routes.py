@@ -30,8 +30,8 @@ def create_department():
 @rbac("admin")
 def list_departments():
     try:
-        limit = request.args.get('limit', type=int)
-        offset = request.args.get('offset', type=int)
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        offset = request.args.get('offset', 0, type=int)
 
         current_app.logger.info("Listing all departments")
         departments = DepartmentService.list_departments(limit=limit, offset=offset)

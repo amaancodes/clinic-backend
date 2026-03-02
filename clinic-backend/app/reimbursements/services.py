@@ -2,14 +2,14 @@ from app.reimbursements.models import Reimbursement
 from app.reimbursements.repository import reimbursement_repository
 from app.core.extensions import db
 from app.core.exceptions import ResourceNotFoundError, AuthorizationError, ValidationError
-from app.core.enum import ReimbursementStatus, Role
+from app.core.enum import ReimbursementStatus, Role, VALID_TRANSITIONS
 from app.appointments.models import Appointment
-
+from app.appointments.repository import appointment_repository
 class ReimbursementService:
     @staticmethod
     def create_reimbursement(data, member_id):
         # Verify appointment exists and belongs to member
-        appointment = Appointment.query.filter_by(id=data['appointment_id'], patient_id=member_id).first()
+        appointment = appointment_repository.get_by_id_and_patient(data['appointment_id'], member_id)
         if not appointment:
             raise ResourceNotFoundError("Appointment not found or does not belong to you")
         
@@ -48,7 +48,17 @@ class ReimbursementService:
     @staticmethod
     def update_reimbursement_status(reimbursement_id, status):
         reimbursement = ReimbursementService.get_reimbursement_by_id(reimbursement_id)
-        reimbursement.status = status
+        
+        try:
+            current_status = ReimbursementStatus(reimbursement.status)
+            target_status = ReimbursementStatus(status)
+        except ValueError:
+            raise ValidationError(f"Invalid status value: {status}")
+
+        if target_status not in VALID_TRANSITIONS.get(current_status, ()):
+            raise ValidationError(f"Invalid transition from {current_status.value} to {target_status.value}")
+
+        reimbursement.status = target_status
         try:
             db.session.commit()
             return reimbursement

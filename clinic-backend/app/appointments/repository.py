@@ -50,4 +50,7 @@ class AppointmentRepository:
              query = query.offset(offset)
         return query.all()
 
+    def get_by_id_and_patient(self, appointment_id: int, patient_id: int):
+        return Appointment.query.filter_by(id=appointment_id, patient_id=patient_id).first()
+
 appointment_repository = AppointmentRepository()

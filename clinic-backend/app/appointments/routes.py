@@ -49,8 +49,8 @@ def list_appointments():
         if not role:
             raise AuthorizationError("Role not found")
             
-        limit = request.args.get('limit', type=int)
-        offset = request.args.get('offset', type=int)
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        offset = request.args.get('offset', 0, type=int)
         
         appointments = AppointmentService.list_appointments(role, user_id, limit=limit, offset=offset)
         response_data = AppointmentResponseSchema(many=True).dump(appointments)

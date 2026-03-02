@@ -14,3 +14,9 @@ class ReimbursementStatus(str, enum.Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
+
+VALID_TRANSITIONS = {
+    ReimbursementStatus.PENDING: (ReimbursementStatus.APPROVED, ReimbursementStatus.REJECTED),
+    ReimbursementStatus.APPROVED: (),
+    ReimbursementStatus.REJECTED: (),
+}
