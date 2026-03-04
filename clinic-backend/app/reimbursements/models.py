@@ -14,6 +14,6 @@ class Reimbursement(BaseModel):
     )
     member_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     appointment_id = db.Column(db.Integer, db.ForeignKey("appointments.id"), nullable=False, unique=True)
-
+    updated_at = db.Column(db.DateTime, nullable=True)
     member = db.relationship("User", back_populates="reimbursements")
-    appointment = db.relationship("Appointment", back_populates="reimbursement")
+    appointment = db.relationship("Appointment", back_populates="reimbursements" , uselist=False)

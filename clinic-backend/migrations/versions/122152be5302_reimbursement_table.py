@@ -26,6 +26,7 @@ def upgrade() -> None:
         sa.Column('status', sa.Enum('pending', 'approved', 'rejected', name='reimbursement_status'), nullable=False),
         sa.Column('member_id', sa.Integer(), nullable=False),
         sa.Column('appointment_id', sa.Integer(), nullable=False),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(['appointment_id'], ['appointments.id'], ),
         sa.ForeignKeyConstraint(['member_id'], ['users.id'], ),
