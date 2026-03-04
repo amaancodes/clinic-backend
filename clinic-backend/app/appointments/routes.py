@@ -1,0 +1,63 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+
+from app.appointments.schemas import (
+    BookAppointmentSchema,
+    AppointmentResponseSchema
+)
+from app.appointments.services import AppointmentService
+from app.core.rbac import rbac
+
+appointments_bp = Blueprint("appointments", __name__, url_prefix="/appointments")
+
+from app.core.exceptions import ValidationError, ResourceNotFoundError, ConflictError, AuthenticationError, AuthorizationError
+
+@appointments_bp.route("/", methods=["POST"])
+@jwt_required()
+@rbac("member")
+def book_appointment():
+    payload = BookAppointmentSchema().load(request.get_json() or {})
+    patient_id = int(get_jwt_identity())
+    
+    try:
+        appointment = AppointmentService.book_appointment(
+            patient_id=patient_id,
+            doctor_id=payload["doctor_id"],
+            start_time=payload["start_time"],
+            end_time=payload["end_time"]
+        )
+        response_data = AppointmentResponseSchema().dump(appointment)
+        return jsonify(response_data), 201
+    except ValidationError as e:
+        return jsonify({"message": str(e)}), 400
+    except ResourceNotFoundError as e:
+        return jsonify({"message": str(e)}), 404
+    except ConflictError as e:
+        return jsonify({"message": str(e)}), 409
+
+@appointments_bp.route("/", methods=["GET"])
+@jwt_required()
+def list_appointments():
+    try:
+        user_identity = get_jwt_identity()
+        if not user_identity:
+            raise AuthenticationError("User not found")
+        user_id = int(user_identity)
+        
+        claims = get_jwt()
+        role = claims.get("role")
+        if not role:
+            raise AuthorizationError("Role not found")
+            
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        offset = request.args.get('offset', 0, type=int)
+        
+        appointments = AppointmentService.list_appointments(role, user_id, limit=limit, offset=offset)
+        response_data = AppointmentResponseSchema(many=True).dump(appointments)
+        return jsonify(response_data), 200
+    except AuthenticationError as e:
+        return jsonify({"message": str(e)}), 401
+    except AuthorizationError as e:
+        return jsonify({"message": str(e)}), 403
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400

@@ -1,0 +1,17 @@
+# Python virtual environments
+venv/
+.venv/
+pyvenv.cfg/
+.env
+
+#cursor rules
+.cursorrules
+
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# VSCode / IDE stuff (optional)
+.vscode/
+.idea/
